@@ -1,0 +1,40 @@
+{
+  "name": "@alexanderolsen/midi-port-manager",
+  "version": "1.0.0",
+  "description": "Wraps midi ports to simplify common functions, and updates clients when available ports change.",
+  "main": "build/ports.js",
+  "scripts": {
+    "start": "tsc -w",
+    "build": "tsc",
+    "test": "jest --coverage",
+    "test:coverage": "node ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.info"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aolsenjazz/midi-port-manager.git"
+  },
+  "keywords": [
+    "midi",
+    "port",
+    "manager",
+    "message",
+    "node"
+  ],
+  "author": "Alexander Olsen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aolsenjazz/midi-port-manager/issues"
+  },
+  "homepage": "https://github.com/aolsenjazz/midi-port-manager#readme",
+  "dependencies": {
+    "midi": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.10",
+    "@babel/plugin-transform-modules-commonjs": "^7.13.8",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/node": "^14.14.33",
+    "coveralls": "^3.1.0",
+    "jest": "^26.6.3"
+  }
+}
