@@ -1,7 +1,7 @@
 {
-  "name": "@alexanderolsen/midi-port-manager",
+  "name": "@alexanderolsen/port-manager",
   "version": "1.0.0",
-  "description": "Wraps midi ports to simplify common functions, and updates clients when available ports change.",
+  "description": "Abstracts the rt-midi API into a simplified list of devices. Automatically links input + output ports, and provides callbacks when available ports change.",
   "main": "build/ports.js",
   "scripts": {
     "start": "tsc -w",
@@ -11,21 +11,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aolsenjazz/midi-port-manager.git"
+    "url": "git+https://github.com/aolsenjazz/port-manager.git"
   },
   "keywords": [
     "midi",
     "port",
     "manager",
     "message",
-    "node"
+    "node",
+    "rt-midi"
   ],
   "author": "Alexander Olsen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aolsenjazz/midi-port-manager/issues"
+    "url": "https://github.com/aolsenjazz/port-manager/issues"
   },
-  "homepage": "https://github.com/aolsenjazz/midi-port-manager#readme",
+  "homepage": "https://github.com/aolsenjazz/port-manager#readme",
   "dependencies": {
     "midi": "^1.0.0"
   },
