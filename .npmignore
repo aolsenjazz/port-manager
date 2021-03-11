@@ -1,9 +1,0 @@
-coverage
-examples
-node_modules
-src
-tests
-.babelrc
-.gitignore
-.npmignore
-tsconfig.json
