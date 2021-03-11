@@ -5,7 +5,12 @@
 ![Depfu](https://img.shields.io/depfu/aolsenjazz/port-manager)
 [![Coverage Status](https://coveralls.io/repos/github/aolsenjazz/midi-port-manager/badge.svg?branch=main)](https://coveralls.io/github/aolsenjazz/port-manager?branch=main)
 
-Port manager simplifies interacting with MIDI devices by providing a layer of abstraction on top of the [rt-midi](https://www.npmjs.com/package/midi) API. Rather than interacting with individual input and output ports, pairs of input+output ports are grouped together and thought of as a single `Device`. `Device`s also provide convenience methods for interacting with the underlying ports.
+Port manager simplifies interacting with MIDI devices by providing a layer of abstraction on top of the [rt-midi](https://www.npmjs.com/package/midi) API. Rather than interacting with individual input and output ports, pairs of input+output ports are grouped together and thought of as a single device (`PortPair` in code). Devices also provide convenience methods for interacting with the underlying ports.
+
+### Features
+- Automatically couple input and output ports
+- Automatically distinguishes between ports with the same name; "APC" and "APC" become "APC0" and "APC1"
+- Invokes callbacks when list of available devices changes
 
 ## Installation
 
@@ -20,14 +25,13 @@ yarn add @alexanderolsen/port-manager
 
 ## Usage
 
-### In modules:
 ```javascript
 const manager = require('@alexanderolsen/port-manager')
 manager.start();
 
 let listenerId = manager.addListener((devices) => {
   devices.forEach((device) => {
-    console.log(device.name, device.hasInput, device.hasOutput);
+    console.log(device.id, device.name, device.hasInput, device.hasOutput);
   });
 });
 ```
@@ -149,7 +153,7 @@ cd port-manager
 npm run build
 ```
 
-Production files are placed in the *dist* directory.
+Production files are placed in the *build* directory.
 
 ## Examples
 
