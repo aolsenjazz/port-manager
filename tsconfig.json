@@ -24,6 +24,6 @@
     "release"
   ],
   "include": [
-    "./src/midi-port-manager.ts"
+    "./src/port-manager.ts"
   ]
 }

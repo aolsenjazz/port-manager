@@ -5,6 +5,7 @@ const OUTPUT = new midi.Output();
 let availableDevices: PortPairs;
 let listeners = new Map();
 
+
 function init() {
   availableDevices = new PortPairs();
 
@@ -94,6 +95,7 @@ function randomString(length: number) {
  * Basic information about an available port. If multiple ports are available with the same namem,
  * keep track of which one it is using `occurrenceNumber`
  */
+ 
 class Port {
 
   index: number;

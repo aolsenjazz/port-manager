@@ -29,6 +29,11 @@
   "dependencies": {
     "midi": "^1.0.0"
   },
+  "jest": {
+    "moduleNameMapper": {
+      "midi": "<rootDir>/src/__mocks__/midi.js"
+    }
+  },
   "devDependencies": {
     "@babel/core": "^7.13.10",
     "@babel/plugin-transform-modules-commonjs": "^7.13.8",
