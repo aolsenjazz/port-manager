@@ -4,12 +4,17 @@ const INPUT = new midi.Input();
 const OUTPUT = new midi.Output();
 let availableDevices: PortPairs;
 let listeners = new Map();
+let interval: any;
 
-
-function init() {
+/**
+ * Initialize some values, and begin listening 
+ *
+ * @param { number } intervalMs The number of miliseconds between each port scan
+ */
+function init(intervalMs: number) {
   availableDevices = new PortPairs();
 
-  setInterval(() => {
+  interval = setInterval(() => {
     const iPorts = parsePorts(INPUT, 'input');
     const oPorts = parsePorts(OUTPUT, 'output');
     
@@ -28,7 +33,7 @@ function init() {
         cb(availableDevices.pairs);
       })
     }
-  }, 100);
+  }, intervalMs);
 }
 
 /**
@@ -139,26 +144,39 @@ class PortPair {
     this.oPort = oPort;
   }
 
+  /**
+   * Open the input and/or output ports if not null.
+   */
   open() {
     if (this.iPort !== null) this.iPort.open();
     if (this.oPort !== null) this.oPort.open();
   }
 
+  /**
+   * Open the input and/or output ports if not null.
+   */
   close() {
     if (this.iPort !== null) this.iPort.close();
     if (this.oPort !== null) this.oPort.close();
   }
 
+  /**
+   * Send a message through the output port. If output port is null, does nothing.
+   */
   send(msg: []) {
     if (this.oPort !== null) this.oPort.send(msg);
   }
 
+  /**
+   * Set a callback to be invoked when the input port receives a message. If input port is null, does nothing.
+   */
   onMessage(cb: Function) {
     if (this.iPort !== null) {
       this.iPort.onMessage(cb);
     }
   }
 
+  /** getters */
   get hasInput() { return this.iPort != null; }
   get hasOutput() { return this.oPort != null; }
   get name() { return this.iPort != null ? this.iPort.name : this.oPort!.name }
@@ -214,26 +232,65 @@ class PortPairs {
    }
 }
 
-init();
-
+/**
+ * Add a callback to be invoked if the list of available MIDI ports changes.
+ *
+ * @param  { Function } cb The function to be invoked
+ * @return { string }      The id used to remove the listener using `removeListener(id)`
+ */
 export function addListener(cb: Function) {
   let id = randomString(7);
   listeners.set(id, cb);
   return id;
 }
 
+/**
+ * Remove the listener associated with the given id.
+ *
+ * @param  { string } id The id associated with the callback. Received from `addListener(cb)`
+ */
 export function removeListener(id: string) {
   listeners.delete(id);
 }
 
+/**
+ * Return a list of all of the available devices
+ * @return { PortPair[] } Array of `PortPair`s
+ */
 export function all() {
   return availableDevices.pairs;
 }
 
+/**
+ * Returns the device with the given id, or null if no such device exists.
+ * 
+ * @param  { string }   id String formatted `{DeviceName}{nth occurrence of device (if multiple devices with same name)}`
+ * @return { PortPair }    A representation of both input and output ports
+ */
 export function get(id: string) {
   return availableDevices.get(id);
 }
 
+/**
+ * Close all connections to ports. All ports are automatically connected when available ports change.
+ */
 export function closeAll() {
   availableDevices.closeAll();
+}
+
+/**
+ * Begin listening to all port changes.
+ *
+ * @param { number } interval Number of miliseconds between each port scan.
+ */
+export function start(interval: number) {
+  init(interval);
+}
+
+/**
+ * Close all ports and stop listening.
+ */
+export function stop() {
+  closeAll();
+  clearInterval(interval);
 }

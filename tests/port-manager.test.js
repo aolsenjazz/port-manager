@@ -1,5 +1,6 @@
-import { all, get, addListener, removeListener, closeAll } from '../src/port-manager';
+import { all, get, addListener, removeListener, closeAll, start, stop } from '../src/port-manager';
 const midi = require('midi');
+start(100);
 
 function createIn(name) {
   let input = new midi.Input();
@@ -256,4 +257,12 @@ test('onMessage does nothing if there is no inPort', (done) => {
   });
 
   let gramp = createIn('sarah');
+});
+
+test('calling stop call clearInterval correctly', () => {
+  const spy = jest.spyOn(window, 'clearInterval');
+
+  stop();
+
+  expect(spy).toHaveBeenCalledTimes(1);
 });
