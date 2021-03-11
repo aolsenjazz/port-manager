@@ -1,4 +1,4 @@
-import { all, get, addListener, removeListener, closeAll } from '../build/port-manager';
+import { all, get, addListener, removeListener, closeAll } from '../src/port-manager';
 const midi = require('midi');
 
 function createIn(name) {
