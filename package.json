@@ -2,7 +2,7 @@
   "name": "@alexanderolsen/port-manager",
   "version": "1.0.0",
   "description": "Abstracts the rt-midi API into a simplified list of devices. Automatically links input + output ports, and provides callbacks when available ports change.",
-  "main": "build/ports.js",
+  "main": "build/port-manager.js",
   "scripts": {
     "start": "tsc -w",
     "build": "tsc",
