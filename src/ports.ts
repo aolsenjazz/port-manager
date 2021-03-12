@@ -79,6 +79,15 @@ export class PortPair {
     }
   }
 
+  _equals(other: PortPair) {
+    if (this.hasInput != other.hasInput) return false;
+    if (this.hasOutput != other.hasOutput) return false;
+    if (this.name != other.name) return false;
+    if (this.occurrenceNumber != other.occurrenceNumber) return false;
+
+    return true;
+  }
+
   /** getters */
   get hasInput() { return this.iPort != null; }
   get hasOutput() { return this.oPort != null; }
@@ -133,4 +142,14 @@ export class PortPairs {
        pair.close();
      });
    }
+
+   equals(other: PortPairs) {
+    if (this.pairs.length != other.pairs.length) return false;
+
+    for (let i = 0; i < this.pairs.length; i++) {
+      if (!this.pairs[i]._equals(other.pairs[i])) return false;
+    }
+
+    return true;
+  }
 }
