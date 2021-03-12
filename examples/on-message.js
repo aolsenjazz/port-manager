@@ -1,6 +1,5 @@
 const midi = require('midi');
 const manager = require('../build/port-manager.js');
-manager.start();
 
 let input = new midi.Input();
 let output = new midi.Output();

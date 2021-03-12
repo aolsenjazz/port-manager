@@ -1,6 +1,5 @@
 const midi = require('midi');
 const manager = require('../build/port-manager.js');
-manager.start();
 
 let id = manager.addListener((deviceList) => {
   console.log(`Available devices: ${deviceList.length}`);

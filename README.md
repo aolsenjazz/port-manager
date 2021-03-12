@@ -27,7 +27,6 @@ yarn add @alexanderolsen/port-manager
 
 ```javascript
 const manager = require('@alexanderolsen/port-manager')
-manager.start();
 
 let listenerId = manager.addListener((devices) => {
   devices.forEach((device) => {
@@ -38,8 +37,7 @@ let listenerId = manager.addListener((devices) => {
 or
 ```javascript
 // If transpiling, you can use `import`s
-import { get, start, stop } from '@alexanderolsen/port-manager';
-start();
+import { get } from '@alexanderolsen/port-manager';
 
 let deviceName = 'MidiDevice';
 let deviceId = 'MidiDevice0'; // {deviceName}{nth device with the given name}
@@ -51,25 +49,12 @@ device.onMessage((deltaTime, message) => {
 });
 
 device.close();
-stop();
 ```
 
 ## API Reference
 
 The `required`'d object exposes:
 ```javascript
-/**
- * Begin listening to all port changes.
- *
- * @param { number } interval Number of miliseconds between each port scan.
- */
-export function start(interval) {...}
-
-/**
- * Close all ports and stop listening.
- */
-export function stop() {}
-
 /**
  * Add a callback to be invoked if the list of available MIDI ports changes.
  *

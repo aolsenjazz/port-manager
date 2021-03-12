@@ -1,39 +1,35 @@
 const midi = require('midi');
+// const ports = require('./ports');
+import { PortPairs, Port, PortPair } from './ports';
 
 const INPUT = new midi.Input();
 const OUTPUT = new midi.Output();
-let availableDevices: PortPairs;
+let availableDevices: PortPairs = new PortPairs();
 let listeners = new Map();
-let interval: any;
 
 /**
- * Initialize some values, and begin listening 
- *
- * @param { number } intervalMs The number of miliseconds between each port scan
+ * Scan the avaialbe midi ports and assemble the list of a available devices. Invoke listeners
+ * if available devices is different than last scan.
  */
-function init(intervalMs: number) {
-  availableDevices = new PortPairs();
+function scanPorts() {
+  const iPorts = parsePorts(INPUT, 'input');
+  const oPorts = parsePorts(OUTPUT, 'output');
+  
+  const devices = new PortPairs();
 
-  interval = setInterval(() => {
-    const iPorts = parsePorts(INPUT, 'input');
-    const oPorts = parsePorts(OUTPUT, 'output');
+  createPairsAndAddToDevices(iPorts, oPorts, devices);
+  createPairsAndAddToDevices(oPorts, iPorts, devices);
+
+  if (JSON.stringify(devices) != JSON.stringify(availableDevices)) {
+    availableDevices.closeAll(); // clean up
     
-    const devices = new PortPairs();
+    availableDevices = devices;
+    availableDevices.openAll();
 
-    createPairsAndAddToDevices(iPorts, oPorts, devices);
-    createPairsAndAddToDevices(oPorts, iPorts, devices);
-
-    if (JSON.stringify(devices) != JSON.stringify(availableDevices)) {
-      availableDevices.closeAll(); // clean up
-      
-      availableDevices = devices;
-      availableDevices.openAll();
-
-      listeners.forEach((cb) => {
-        cb(availableDevices.pairs);
-      })
-    }
-  }, intervalMs);
+    listeners.forEach((cb) => {
+      cb(availableDevices.pairs);
+    })
+  }
 }
 
 /**
@@ -44,8 +40,12 @@ function parsePorts(parent: any, type: string) {
   let ports: Port[] = [];
   let addedNames: string[] = [];
   for (let i = 0; i < parent.getPortCount(); i++) {
-
     let name: string = parent.getPortName(i);
+
+    // Gross safeguard. When closing Blueboard, the ports disappears tho getPortCount still reports 1.
+    // getPortName returns ''. Just ignore it when in this state.
+    if (!name) continue; 
+
     let nameOccurences: number = addedNames.filter((val) => val === name).length;
     ports.push(new Port(i, nameOccurences, type, name));
     addedNames.push(name);
@@ -96,141 +96,8 @@ function randomString(length: number) {
   return Math.random().toString(36).substring(0, length);
 }
 
-/**
- * Basic information about an available port. If multiple ports are available with the same namem,
- * keep track of which one it is using `occurrenceNumber`
- */
- 
-class Port {
-
-  index: number;
-  occurrenceNumber: number;
-  type: string;
-  name: string;
-  port: any;
-
-  constructor(index: number, occurrenceNumber: number, type: string, name: string) {
-    this.index = index;
-    this.occurrenceNumber = occurrenceNumber;
-    this.type = type;
-    this.name = name;
-
-    this.port = type === 'input' ? new midi.Input() : new midi.Output();
-  }
-
-  open() { this.port.openPort(this.index); }
-  close() { this.port.closePort(); }
-  
-  send(msg: []) { 
-    this.port.sendMessage(msg);
-  }
-  onMessage(cb: Function) {
-    this.port.on('message', cb);
-  }
-
-}
-
-/**
- * Couples input and output ports. Each pair doesn't necessarily have to have both an input and
- * output port; pairs of (iPort && null) or (null ** oPort) may exist.
- */
-class PortPair {
-
-  iPort: Port | null;
-  oPort: Port | null;
-
-  constructor(iPort: Port | null, oPort: Port | null) {
-    this.iPort = iPort;
-    this.oPort = oPort;
-  }
-
-  /**
-   * Open the input and/or output ports if not null.
-   */
-  open() {
-    if (this.iPort !== null) this.iPort.open();
-    if (this.oPort !== null) this.oPort.open();
-  }
-
-  /**
-   * Open the input and/or output ports if not null.
-   */
-  close() {
-    if (this.iPort !== null) this.iPort.close();
-    if (this.oPort !== null) this.oPort.close();
-  }
-
-  /**
-   * Send a message through the output port. If output port is null, does nothing.
-   */
-  send(msg: []) {
-    if (this.oPort !== null) this.oPort.send(msg);
-  }
-
-  /**
-   * Set a callback to be invoked when the input port receives a message. If input port is null, does nothing.
-   */
-  onMessage(cb: Function) {
-    if (this.iPort !== null) {
-      this.iPort.onMessage(cb);
-    }
-  }
-
-  /** getters */
-  get hasInput() { return this.iPort != null; }
-  get hasOutput() { return this.oPort != null; }
-  get name() { return this.iPort != null ? this.iPort.name : this.oPort!.name }
-  get occurrenceNumber() { return this.iPort != null ? this.iPort.occurrenceNumber : this.oPort!.occurrenceNumber }
-  get id() { return `${this.name}${this.occurrenceNumber}` }
-}
-
-/**
- * Wrapper around a list of `PortPair`s. 
- */
-class PortPairs {
-
-  pairs: PortPair[] = [];
-
-  constructor() {}
-
-  /**
-   * Does `pairs` already contain the given port pair?
-   */
-  contains(portPair: PortPair) {
-    let _contains = false;
-    this.pairs.forEach((p) => {
-      if (portPair.name === p.name && portPair.occurrenceNumber === p.occurrenceNumber) {
-        _contains = true;
-      }
-    });
-
-    return _contains;
-  }
-
-  push(pair: PortPair) {
-    this.pairs.push(pair);
-  }
-
-  get(id: string) {
-    for (let i = 0; i < this.pairs.length; i++) {
-      if (this.pairs[i].id === id) return this.pairs[i];
-    }
-
-    return null;
-  }
-
-  openAll() {
-    this.pairs.forEach((pair) => {
-      pair.open();
-    });
-  }
-
-   closeAll() {
-     this.pairs.forEach((pair) => {
-       pair.close();
-     });
-   }
-}
+scanPorts();
+setInterval(() => scanPorts(), 100);
 
 /**
  * Add a callback to be invoked if the list of available MIDI ports changes.
@@ -276,21 +143,4 @@ export function get(id: string) {
  */
 export function closeAll() {
   availableDevices.closeAll();
-}
-
-/**
- * Begin listening to all port changes.
- *
- * @param { number } interval Number of miliseconds between each port scan.
- */
-export function start(interval: number) {
-  init(interval);
-}
-
-/**
- * Close all ports and stop listening.
- */
-export function stop() {
-  closeAll();
-  clearInterval(interval);
 }

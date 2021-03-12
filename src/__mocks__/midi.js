@@ -36,6 +36,10 @@ export class Input {
   on() {
 
   }
+
+  performBlueboardBug() {
+    outPorts.splice(outPorts.indexOf(this.name), 1, '');
+  }
 }
 
 export class Output {
@@ -72,5 +76,9 @@ export class Output {
 
   on() {
     
+  }
+
+  performBlueboardBug() {
+    inPorts.splice(inPorts.indexOf(this.name), 1, '');
   }
 }

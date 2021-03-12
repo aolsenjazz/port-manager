@@ -1,6 +1,5 @@
-import { all, get, addListener, removeListener, closeAll, start, stop } from '../src/port-manager';
+import { all, get, addListener, removeListener, closeAll } from '../src/port-manager';
 const midi = require('midi');
-start(100);
 
 function createIn(name) {
   let input = new midi.Input();
@@ -259,10 +258,21 @@ test('onMessage does nothing if there is no inPort', (done) => {
   let gramp = createIn('sarah');
 });
 
-test('calling stop call clearInterval correctly', () => {
-  const spy = jest.spyOn(window, 'clearInterval');
+test('blueboard bug causes port manager to ignore it', (done) => {
+  let id = addListener((devices) => {
+    if (devices.length === 1) {
+      blueboard.performBlueboardBug();
+    }
 
-  stop();
+    let i = new midi.Input();
+    if (devices.length === 0 && i.getPortCount() === 1) {
+      removeListener(id);
+      closeAll();
+      blueboard.closePort();
 
-  expect(spy).toHaveBeenCalledTimes(1);
+      done();
+    }
+  });
+
+  let blueboard = createOut('blueboard');
 });
