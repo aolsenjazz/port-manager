@@ -20,7 +20,7 @@ function scanPorts() {
   createPairsAndAddToDevices(iPorts, oPorts, devices);
   createPairsAndAddToDevices(oPorts, iPorts, devices);
 
-  if (JSON.stringify(devices) != JSON.stringify(availableDevices)) {
+  if (!devices.equals(availableDevices)) {
     availableDevices.closeAll(); // clean up
     
     availableDevices = devices;
