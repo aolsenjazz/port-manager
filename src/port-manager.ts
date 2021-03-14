@@ -1,35 +1,71 @@
 const midi = require('midi');
-// const ports = require('./ports');
 import { PortPairs, Port, PortPair } from './ports';
 
 const INPUT = new midi.Input();
 const OUTPUT = new midi.Output();
+
+let currentIns: string[] = [];
+let currentOuts: string[] = [];
+
 let availableDevices: PortPairs = new PortPairs();
+
 let listeners = new Map();
 
 /**
  * Scan the avaialbe midi ports and assemble the list of a available devices. Invoke listeners
- * if available devices is different than last scan.
+ * if the new ports differeent from currentIns and/or currentOuts
  */
 function scanPorts() {
-  const iPorts = parsePorts(INPUT, 'input');
-  const oPorts = parsePorts(OUTPUT, 'output');
-  
-  const devices = new PortPairs();
+  if (havePortsChanged()) {
+    availableDevices.closeAll();
 
-  createPairsAndAddToDevices(iPorts, oPorts, devices);
-  createPairsAndAddToDevices(oPorts, iPorts, devices);
-
-  if (!devices.equals(availableDevices)) {
-    availableDevices.closeAll(); // clean up
+    const iPorts = parsePorts(INPUT, 'input');
+    const oPorts = parsePorts(OUTPUT, 'output');
     
+    const devices = new PortPairs();
+
+    createPairsAndAddToDevices(iPorts, oPorts, devices);
+    createPairsAndAddToDevices(oPorts, iPorts, devices);
+
     availableDevices = devices;
+
+    const [ins, outs] = getPortNames();
+    currentIns = ins;
+    currentOuts = outs;
+
     availableDevices.openAll();
 
     listeners.forEach((cb) => {
       cb(availableDevices.pairs);
     })
   }
+}
+
+/**
+ * Compare the lists of inputs and outs against the currentIns and currentOuts
+ *
+ * @return { bool } whether or not the ports have changed
+ */
+function havePortsChanged() {
+  const [newIns, newOuts] = getPortNames();
+  
+  if (newIns.length != currentIns.length || newOuts.length != currentOuts.length) return true;
+
+  const insChanged = (newIns.filter((val, i) => val != currentIns[i])).length;
+  const outsChanged = (newOuts.filter((val, i) => val != currentOuts[i])).length;
+
+  return insChanged || outsChanged;
+}
+
+/**
+ * Returns the lists of input and output names. Removes all ports whose name is ''. This is
+ * *unfortunately* necessary because (at least on OSX 11.2), virtual ports will change their name
+ * to '' before being full closed.
+ */
+function getPortNames() {
+  const ins = [...Array(INPUT.getPortCount())].map((_val, i) => INPUT.getPortName(i));
+  const outs = [...Array(OUTPUT.getPortCount())].map((_val, i) => OUTPUT.getPortName(i));
+  return [ins.filter((name) => name != ''), outs.filter((name) => name != '')];
 }
 
 /**
@@ -42,7 +78,7 @@ function parsePorts(parent: any, type: string) {
   for (let i = 0; i < parent.getPortCount(); i++) {
     let name: string = parent.getPortName(i);
 
-    // Gross safeguard. When closing Blueboard, the ports disappears tho getPortCount still reports 1.
+    // Gross safeguard. When closing virtual ports, the port disappears tho getPortCount still reports 1.
     // getPortName returns ''. Just ignore it when in this state.
     if (!name) continue; 
 
@@ -136,11 +172,4 @@ export function all() {
  */
 export function get(id: string) {
   return availableDevices.get(id);
-}
-
-/**
- * Close all connections to ports. All ports are automatically connected when available ports change.
- */
-export function closeAll() {
-  availableDevices.closeAll();
 }

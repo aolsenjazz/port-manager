@@ -1,4 +1,4 @@
-import { all, get, addListener, removeListener, closeAll } from '../src/port-manager';
+import { all, get, addListener, removeListener } from '../src/port-manager';
 const midi = require('midi');
 
 function createIn(name) {
@@ -14,7 +14,6 @@ function createOut(name) {
 }
 
 test('hasInput returns correct value', (done) => {
-  closeAll();
   let called = false;
   let id = addListener(() => {
     called = true;
@@ -35,7 +34,6 @@ test('all() returns 1 device, {1 out 0 in}', (done) => {
     expect(all().length).toBe(1);
 
     removeListener(id);
-    closeAll();
     test1.closePort();
 
     done();
@@ -49,7 +47,6 @@ test('all() returns 1 device, {0 out 1 in}', (done) => {
     expect(all().length).toBe(1);
 
     removeListener(id);
-    closeAll();
     test1.closePort();
     
     done();
@@ -63,7 +60,6 @@ test('all() returns 1 device, {1 out, 1 in, same name}', (done) => {
     expect(all().length).toBe(1);
 
     removeListener(id);
-    closeAll();
     amelia1.closePort();
     amelia2.closePort();
     
@@ -75,19 +71,18 @@ test('all() returns 1 device, {1 out, 1 in, same name}', (done) => {
 });
 
 test('all() returns 2 devices, {1 out, 1 in, different names}', (done) => {
-  let id = addListener(() => {
+  let gabby1 = createIn('Gabby1');
+  let gabby2 = createOut('Gabby2');
+
+  let id = addListener((devices) => {
     expect(all().length).toBe(2);
 
     removeListener(id);
-    closeAll();
     gabby1.closePort();
     gabby2.closePort();
     
     done();
   });
-
-  let gabby1 = createIn('Gabby1');
-  let gabby2 = createOut('Gabby2');
 });
 
 test('all() returns 1 device, {2 out, 0 in, remove 1 out}', (done) => {
@@ -95,7 +90,6 @@ test('all() returns 1 device, {2 out, 0 in, remove 1 out}', (done) => {
     expect(all().length).toBe(1);
 
     removeListener(id);
-    closeAll();
     luke1.closePort();
     
     done();
@@ -111,7 +105,6 @@ test('all() returns 2 devices, {2 out, 2 in, both same name}', (done) => {
     expect(all().length).toBe(2);
 
     removeListener(id);
-    closeAll();
     brennaIn1.closePort();
     brennaOut1.closePort();
     brennaIn2.closePort();
@@ -131,7 +124,6 @@ test('get() retrieves the correct portpair', (done) => {
     expect(get('rene0').name).toBe('rene');
 
     removeListener(id);
-    closeAll();
     rene1.closePort();
     rene2.closePort();
     
@@ -151,7 +143,6 @@ test('getName returns oPort.name when iPort=null', (done) => {
     expect(get('gram0').name).toBe('gram');
 
     removeListener(id);
-    closeAll();
     gram.closePort();
     
     done();
@@ -169,7 +160,6 @@ test('send() calls port.sendMessage', (done) => {
     expect(spy).toHaveBeenCalledTimes(1);
 
     removeListener(id);
-    closeAll();
     gramp.closePort();
     
     done();
@@ -184,7 +174,6 @@ test('send() does nothing if inport is not available', (done) => {
     device.send([0,0,0]);
 
     removeListener(id);
-    closeAll();
     gramp.closePort();
     
     done();
@@ -200,7 +189,6 @@ test('hasInput returns correct value', (done) => {
     expect(device.hasOutput).toBe(false);
 
     removeListener(id);
-    closeAll();
     gramp.closePort();
     
     done();
@@ -216,7 +204,6 @@ test('hasInput returns correct value', (done) => {
     expect(device.hasInput).toBe(false);
 
     removeListener(id);
-    closeAll();
     gramp.closePort();
     
     done();
@@ -234,7 +221,6 @@ test('onMessage passes to port correctly', (done) => {
     expect(spy).toHaveBeenCalledTimes(1);
 
     removeListener(id);
-    closeAll();
     gramp.closePort();
     
     done();
@@ -249,7 +235,6 @@ test('onMessage does nothing if there is no inPort', (done) => {
     device.onMessage(() => {});
 
     removeListener(id);
-    closeAll();
     gramp.closePort();
     
     done();
@@ -267,7 +252,6 @@ test('blueboard bug causes port manager to ignore it', (done) => {
     let i = new midi.Input();
     if (devices.length === 0 && i.getPortCount() === 1) {
       removeListener(id);
-      closeAll();
       blueboard.closePort();
 
       done();
@@ -275,4 +259,20 @@ test('blueboard bug causes port manager to ignore it', (done) => {
   });
 
   let blueboard = createOut('blueboard');
+});
+
+test('same port count, different ports invokes listeners', async (done) => {
+  let in1 = createIn('in1');
+  let out1 = createOut('out1');
+
+
+  setTimeout(() => {
+    in1.closePort();
+    let in2 = createIn('in2');
+
+    addListener((devices) => {
+      expect(devices.length).toBe(2);
+      done();
+    });
+  }, 200);
 });

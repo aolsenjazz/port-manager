@@ -5,7 +5,6 @@ export class Input {
   openVirtualPort(name) {
     this.name = name;
     this.virtual = true;
-
     outPorts.push(name);
   }
 
@@ -17,16 +16,15 @@ export class Input {
     return inPorts[index];
   }
 
-  openPort() {
-    inPorts.push(this.name);
-  }
+  openPort() {}
 
   closePort() {
-    if (this.virtual) {
-      outPorts.splice(outPorts.indexOf(this.name), 1);
-    } else {
-      inPorts.splice(inPorts.indexOf(this.name), 1);
-    }
+    let relevantPorts = this.virtual ? outPorts : inPorts;
+    let indexOf = relevantPorts.indexOf(this.name);
+
+    if (indexOf === -1) return;
+
+    relevantPorts.splice(indexOf, 1);
   }
 
   sendMessage() {
@@ -39,6 +37,7 @@ export class Input {
 
   performBlueboardBug() {
     outPorts.splice(outPorts.indexOf(this.name), 1, '');
+    this.name = '';
   }
 }
 
@@ -46,7 +45,6 @@ export class Output {
   openVirtualPort(name) {
     this.name = name;
     this.virtual = true;
-
     inPorts.push(name);
   }
 
@@ -58,27 +56,23 @@ export class Output {
     return outPorts[index];
   }
 
-  openPort() {
-    outPorts.push(this.name);
-  }
+  openPort() {}
 
   closePort() {
-    if (this.virtual) {
-      inPorts.splice(inPorts.indexOf(this.name), 1);
-    } else {
-      outPorts.splice(outPorts.indexOf(this.name), 1);
-    }
+    let relevantPorts = this.virtual ? inPorts : outPorts;
+    let indexOf = relevantPorts.indexOf(this.name);
+
+    if (indexOf === -1) return;
+
+    relevantPorts.splice(indexOf, 1);
   }
 
-  sendMessage() {
+  sendMessage() {}
 
-  }
-
-  on() {
-    
-  }
+  on() {}
 
   performBlueboardBug() {
     inPorts.splice(inPorts.indexOf(this.name), 1, '');
+    this.name = '';
   }
 }
