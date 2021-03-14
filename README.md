@@ -83,11 +83,6 @@ export function all() {...}
  * @return { PortPair }    A representation of both input and output ports
  */
 export function get(id) {...}
-
-/**
- * Close all connections to ports. All ports are automatically connected when available ports change.
- */
-export function closeAll() {...}
 ```
 
 ### `PortPair`
