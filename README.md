@@ -53,7 +53,7 @@ device.close();
 
 ## API Reference
 
-The `required`'d object exposes:
+The `require`'d object exposes:
 ```javascript
 /**
  * Add a callback to be invoked if the list of available MIDI ports changes.
