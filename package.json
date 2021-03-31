@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/aolsenjazz/port-manager#readme",
   "dependencies": {
-    "midi": "^1.0.0"
+    "midi": "^1.0.2"
   },
   "jest": {
     "moduleNameMapper": {
