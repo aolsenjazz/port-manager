@@ -1,6 +1,6 @@
 {
   "name": "@alexanderolsen/port-manager",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Abstracts the rt-midi API into a simplified list of devices. Automatically links input + output ports, and provides callbacks when available ports change.",
   "main": "build/port-manager.js",
   "scripts": {
