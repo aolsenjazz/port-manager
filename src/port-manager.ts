@@ -1,5 +1,5 @@
-const midi = require('midi');
-import { PortPairs, Port, PortPair } from './ports';
+const midi = require("midi");
+import { PortPairs, Port, PortPair } from "./ports";
 
 const INPUT = new midi.Input();
 const OUTPUT = new midi.Output();
@@ -19,9 +19,9 @@ function scanPorts() {
   if (havePortsChanged()) {
     availableDevices.closeAll();
 
-    const iPorts = parsePorts(INPUT, 'input');
-    const oPorts = parsePorts(OUTPUT, 'output');
-    
+    const iPorts = parsePorts(INPUT, "input");
+    const oPorts = parsePorts(OUTPUT, "output");
+
     const devices = new PortPairs();
 
     createPairsAndAddToDevices(iPorts, oPorts, devices);
@@ -37,7 +37,7 @@ function scanPorts() {
 
     listeners.forEach((cb) => {
       cb(availableDevices.pairs);
-    })
+    });
   }
 }
 
@@ -48,11 +48,15 @@ function scanPorts() {
  */
 function havePortsChanged() {
   const [newIns, newOuts] = getPortNames();
-  
-  if (newIns.length != currentIns.length || newOuts.length != currentOuts.length) return true;
 
-  const insChanged = (newIns.filter((val, i) => val != currentIns[i])).length;
-  const outsChanged = (newOuts.filter((val, i) => val != currentOuts[i])).length;
+  if (
+    newIns.length != currentIns.length ||
+    newOuts.length != currentOuts.length
+  )
+    return true;
+
+  const insChanged = newIns.filter((val, i) => val != currentIns[i]).length;
+  const outsChanged = newOuts.filter((val, i) => val != currentOuts[i]).length;
 
   return insChanged || outsChanged;
 }
@@ -63,9 +67,13 @@ function havePortsChanged() {
  * to '' before being full closed.
  */
 function getPortNames() {
-  const ins = [...Array(INPUT.getPortCount())].map((_val, i) => INPUT.getPortName(i));
-  const outs = [...Array(OUTPUT.getPortCount())].map((_val, i) => OUTPUT.getPortName(i));
-  return [ins.filter((name) => name != ''), outs.filter((name) => name != '')];
+  const ins = [...Array(INPUT.getPortCount())].map((_val, i) =>
+    INPUT.getPortName(i)
+  );
+  const outs = [...Array(OUTPUT.getPortCount())].map((_val, i) =>
+    OUTPUT.getPortName(i)
+  );
+  return [ins.filter((name) => name != ""), outs.filter((name) => name != "")];
 }
 
 /**
@@ -80,9 +88,10 @@ function parsePorts(parent: any, type: string) {
 
     // Gross safeguard. When closing virtual ports, the port disappears tho getPortCount still reports 1.
     // getPortName returns ''. Just ignore it when in this state.
-    if (!name) continue; 
+    if (!name) continue;
 
-    let nameOccurences: number = addedNames.filter((val) => val === name).length;
+    let nameOccurences: number = addedNames.filter((val) => val === name)
+      .length;
     ports.push(new Port(i, nameOccurences, type, name));
     addedNames.push(name);
   }
@@ -97,7 +106,10 @@ function parsePorts(parent: any, type: string) {
 function getSister(port: Port, sisterList: Port[]) {
   let sister: Port | null = null;
   sisterList.forEach((candidate) => {
-    if (port.name === candidate.name && port.occurrenceNumber === candidate.occurrenceNumber) {
+    if (
+      port.name === candidate.name &&
+      port.occurrenceNumber === candidate.occurrenceNumber
+    ) {
       sister = candidate;
     }
   });
@@ -108,12 +120,16 @@ function getSister(port: Port, sisterList: Port[]) {
  * Pairs each `Port` in `portList` with it sister port in `sisterList` and added the resulting pair to
  * `portPairs` object if it doesn't already contain the pair.
  */
-function createPairsAndAddToDevices(portList: Port[], sisterList: Port[], portPairs: PortPairs) {
+function createPairsAndAddToDevices(
+  portList: Port[],
+  sisterList: Port[],
+  portPairs: PortPairs
+) {
   portList.forEach((port) => {
     let sister = getSister(port, sisterList);
 
-    let first = port.type === 'input' ? port : sister;
-    let second = port.type === 'input' ? sister : port;
+    let first = port.type === "input" ? port : sister;
+    let second = port.type === "input" ? sister : port;
 
     let pair = new PortPair(first, second);
 
@@ -125,7 +141,7 @@ function createPairsAndAddToDevices(portList: Port[], sisterList: Port[], portPa
 
 /**
  * Generate a random string of given length
- * 
+ *
  * @param { Number } length Length of the string
  */
 function randomString(length: number) {
@@ -141,7 +157,7 @@ setInterval(() => scanPorts(), 100);
  * @param  { Function } cb The function to be invoked
  * @return { string }      The id used to remove the listener using `removeListener(id)`
  */
-export function addListener(cb: Function) {
+export function addListener(cb: (devices: PortPair[]) => void) {
   let id = randomString(7);
   listeners.set(id, cb);
   return id;
@@ -166,7 +182,7 @@ export function all() {
 
 /**
  * Returns the device with the given id, or null if no such device exists.
- * 
+ *
  * @param  { string }   id String formatted `{DeviceName}{nth occurrence of device (if multiple devices with same name)}`
  * @return { PortPair }    A representation of both input and output ports
  */
