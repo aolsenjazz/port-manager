@@ -1,36 +1,43 @@
-const midi = require('midi');
+const midi = require("midi");
 
 /**
  * Basic information about an available port. If multiple ports are available with the same namem,
  * keep track of which one it is using `occurrenceNumber`
  */
 export class Port {
-
   index: number;
   occurrenceNumber: number;
   type: string;
   name: string;
   port: any;
 
-  constructor(index: number, occurrenceNumber: number, type: string, name: string) {
+  constructor(
+    index: number,
+    occurrenceNumber: number,
+    type: string,
+    name: string
+  ) {
     this.index = index;
     this.occurrenceNumber = occurrenceNumber;
     this.type = type;
     this.name = name;
 
-    this.port = type === 'input' ? new midi.Input() : new midi.Output();
+    this.port = type === "input" ? new midi.Input() : new midi.Output();
   }
 
-  open() { this.port.openPort(this.index); }
-  close() { this.port.closePort(); }
-  
-  send(msg: []) { 
+  open() {
+    this.port.openPort(this.index);
+  }
+  close() {
+    this.port.closePort();
+  }
+
+  send(msg: []) {
     this.port.sendMessage(msg);
   }
   onMessage(cb: Function) {
-    this.port.on('message', cb);
+    this.port.on("message", cb);
   }
-
 }
 
 /**
@@ -38,7 +45,6 @@ export class Port {
  * output port; pairs of (iPort && null) or (null ** oPort) may exist.
  */
 export class PortPair {
-
   iPort: Port | null;
   oPort: Port | null;
 
@@ -89,18 +95,29 @@ export class PortPair {
   }
 
   /** getters */
-  get hasInput() { return this.iPort != null; }
-  get hasOutput() { return this.oPort != null; }
-  get name() { return this.iPort != null ? this.iPort.name : this.oPort!.name }
-  get occurrenceNumber() { return this.iPort != null ? this.iPort.occurrenceNumber : this.oPort!.occurrenceNumber }
-  get id() { return `${this.name}${this.occurrenceNumber}` }
+  get hasInput() {
+    return this.iPort != null;
+  }
+  get hasOutput() {
+    return this.oPort != null;
+  }
+  get name() {
+    return this.iPort != null ? this.iPort.name : this.oPort!.name;
+  }
+  get occurrenceNumber() {
+    return this.iPort != null
+      ? this.iPort.occurrenceNumber
+      : this.oPort!.occurrenceNumber;
+  }
+  get id() {
+    return `${this.name}${this.occurrenceNumber}`;
+  }
 }
 
 /**
- * Wrapper around a list of `PortPair`s. 
+ * Wrapper around a list of `PortPair`s.
  */
 export class PortPairs {
-
   pairs: PortPair[] = [];
 
   constructor() {}
@@ -111,7 +128,10 @@ export class PortPairs {
   contains(portPair: PortPair) {
     let _contains = false;
     this.pairs.forEach((p) => {
-      if (portPair.name === p.name && portPair.occurrenceNumber === p.occurrenceNumber) {
+      if (
+        portPair.name === p.name &&
+        portPair.occurrenceNumber === p.occurrenceNumber
+      ) {
         _contains = true;
       }
     });
@@ -137,13 +157,13 @@ export class PortPairs {
     });
   }
 
-   closeAll() {
-     this.pairs.forEach((pair) => {
-       pair.close();
-     });
-   }
+  closeAll() {
+    this.pairs.forEach((pair) => {
+      pair.close();
+    });
+  }
 
-   equals(other: PortPairs) {
+  equals(other: PortPairs) {
     if (this.pairs.length != other.pairs.length) return false;
 
     for (let i = 0; i < this.pairs.length; i++) {

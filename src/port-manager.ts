@@ -190,4 +190,4 @@ export function get(id: string) {
   return availableDevices.get(id);
 }
 
-export type { PortPair, Port };
+export { PortPair, Port };
