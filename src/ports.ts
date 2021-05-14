@@ -32,7 +32,7 @@ export class Port {
     this.port.closePort();
   }
 
-  send(msg: []) {
+  send(msg: number[]) {
     this.port.sendMessage(msg);
   }
   onMessage(cb: Function) {
@@ -72,7 +72,7 @@ export class PortPair {
   /**
    * Send a message through the output port. If output port is null, does nothing.
    */
-  send(msg: []) {
+  send(msg: number[]) {
     if (this.oPort !== null) this.oPort.send(msg);
   }
 
