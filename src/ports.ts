@@ -35,7 +35,7 @@ export class Port {
   send(msg: number[]) {
     this.port.sendMessage(msg);
   }
-  onMessage(cb: Function) {
+  onMessage(cb: (deltaTime: number, message: number[]) => void) {
     this.port.on("message", cb);
   }
 }
@@ -79,7 +79,7 @@ export class PortPair {
   /**
    * Set a callback to be invoked when the input port receives a message. If input port is null, does nothing.
    */
-  onMessage(cb: Function) {
+  onMessage(cb: (deltaTime: number, message: number[]) => void) {
     if (this.iPort !== null) {
       this.iPort.onMessage(cb);
     }

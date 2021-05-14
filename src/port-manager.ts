@@ -154,7 +154,7 @@ setInterval(() => scanPorts(), 100);
 /**
  * Add a callback to be invoked if the list of available MIDI ports changes.
  *
- * @param  { Function } cb The function to be invoked
+ * @param  { (deltaTime: number, message: number[]) => void } cb The function to be invoked
  * @return { string }      The id used to remove the listener using `removeListener(id)`
  */
 export function addListener(cb: (devices: PortPair[]) => void) {
