@@ -110,7 +110,7 @@ export class PortPair {
       : this.oPort!.occurrenceNumber;
   }
   get id() {
-    return `${this.name}${this.occurrenceNumber}`;
+    return `${this.name} ${this.occurrenceNumber}`;
   }
 }
 

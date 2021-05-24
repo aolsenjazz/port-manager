@@ -13,7 +13,7 @@ let listeners = new Map();
 
 /**
  * Scan the avaialbe midi ports and assemble the list of a available devices. Invoke listeners
- * if the new ports differeent from currentIns and/or currentOuts
+ * if the new ports different from currentIns and/or currentOuts
  */
 function scanPorts() {
   if (havePortsChanged()) {
